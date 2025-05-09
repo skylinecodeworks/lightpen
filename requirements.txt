@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sqlalchemy
+python-dotenv
+psycopg2-binary
+weasyprint
+stripe
+python-multipart
+httpx
