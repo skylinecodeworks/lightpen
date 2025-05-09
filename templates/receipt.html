@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <style>
+      body { font-family: sans-serif; margin: 2rem; }
+      h1 { text-align: center; }
+      .field { margin-bottom: 1rem; }
+      .label { font-weight: bold; }
+    </style>
+  </head>
+  <body>
+    <h1>Recibo Lightning</h1>
+    <div class="field"><span class="label">ID:</span> {{ invoice_id }}</div>
+    <div class="field"><span class="label">Cliente:</span> {{ cliente }}</div>
+    <div class="field"><span class="label">Monto (msat):</span> {{ monto_msat }}</div>
+    <div class="field"><span class="label">Descripción:</span> {{ descripcion }}</div>
+    <div class="field"><span class="label">Hash:</span> {{ payment_hash }}</div>
+    <div class="field"><span class="label">Firma:</span> {{ firma }}</div>
+  </body>
+</html>
