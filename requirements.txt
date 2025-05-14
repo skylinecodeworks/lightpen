@@ -7,3 +7,8 @@ weasyprint
 stripe
 python-multipart
 httpx
+
+Jinja2
+requests
+pydantic
+alembic
