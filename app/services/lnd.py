@@ -18,18 +18,14 @@ def get_lnd_rest_config():
     return host, tls_cert, headers
 
 def check_payment(payment_hash: str) -> bool:
-    """
-    Consulta real al nodo LND vía REST v2 si la invoice con este payment_hash
-    ha sido pagada (settled=true).
-    """
     host, tls_cert, headers = get_lnd_rest_config()
-    url = f"https://{host}/v2/invoices/{payment_hash}"
+    url = f"https://{host}/v2/invoices/lookup?payment_hash={payment_hash}"
     try:
         resp = requests.get(url, headers=headers, verify=tls_cert)
         resp.raise_for_status()
         invoice = resp.json()
-        # En v2 la respuesta es directamente el objeto Invoice:
         return invoice.get("settled", False)
     except requests.RequestException as e:
         print(f"[LND-REST] Error al consultar invoice: {e}")
         return False
+

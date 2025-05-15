@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 
 services:
   bitcoind:
@@ -23,6 +23,11 @@ services:
       - bitcoind_data:/bitcoin
     networks:
       - lnnet
+    healthcheck:
+      test: ["CMD", "bitcoin-cli", "-regtest", "-rpcuser=bitcoin", "-rpcpassword=bitcoin", "getblockchaininfo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   lnd1:
     image: lightninglabs/lnd:v0.18.5-beta
@@ -51,7 +56,8 @@ services:
     volumes:
       - ./lnd1-data:/root/.lnd
     depends_on:
-      - bitcoind
+      bitcoind:
+        condition: service_healthy
     networks:
       - lnnet
 
@@ -82,10 +88,10 @@ services:
     volumes:
       - ./lnd2-data:/root/.lnd
     depends_on:
-      - bitcoind
+      bitcoind:
+        condition: service_healthy
     networks:
       - lnnet
-
 
 volumes:
   bitcoind_data:
