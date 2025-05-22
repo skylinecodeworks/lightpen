@@ -1,0 +1,106 @@
+openapi: 3.0.3
+info:
+  title: Lightpen API
+  version: "1.0"
+  description: API para registrar pagos en la red Lightning y generar recibos PDF firmados digitalmente.
+servers:
+  - url: http://localhost:8000
+    description: Servidor local de desarrollo
+paths:
+  /invoices/:
+    post:
+      summary: Crear o recuperar una factura
+      description: Verifica un pago por `payment_hash`, genera una factura si no existe y crea un recibo en PDF si el pago fue confirmado.
+      tags:
+        - Invoices
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvoiceCreate"
+      responses:
+        '200':
+          description: Factura registrada o recibo generado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceResponse"
+        '400':
+          description: Pago no confirmado
+        '409':
+          description: Conflicto - La factura ya existe
+  /receipts/{receipt_id}:
+    get:
+      summary: Descargar recibo en PDF
+      description: Devuelve el archivo PDF de un recibo asociado a una invoice confirmada, siempre que el tenant sea el dueño.
+      tags:
+        - Receipts
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: receipt_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID del recibo (UUID)
+      responses:
+        '200':
+          description: PDF del recibo
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Recibo no encontrado o acceso denegado
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+  schemas:
+    InvoiceCreate:
+      type: object
+      required:
+        - payment_hash
+        - amount_msat
+        - description
+      properties:
+        payment_hash:
+          type: string
+          example: "637d0021c9a611c873a209db3e549705875deea9bc1f16ac812dfea7790582cb"
+        amount_msat:
+          type: integer
+          example: 500000
+        description:
+          type: string
+          example: "Servicio de consultoría"
+        customer_name:
+          type: string
+          example: "Juan Pérez"
+    InvoiceResponse:
+      type: object
+      required:
+        - invoice_id
+        - status
+      properties:
+        invoice_id:
+          type: string
+          example: "54ad320e-2c77-4c9e-8b3d-c7f4f383dfe7"
+        status:
+          type: string
+          enum: [pending, paid, expired]
+          example: "paid"
+        receipt_id:
+          type: string
+          nullable: true
+          example: "b2a0121b-c458-4905-a7db-01221d865e56"
+        receipt_url:
+          type: string
+          nullable: true
+          example: "/generated_receipts/b2a0121b-c458-4905-a7db-01221d865e56.pdf"

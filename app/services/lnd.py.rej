@@ -1,0 +1,13 @@
+--- services/lnd.py.orig	2025-05-12 15:00:00.000000000 +0000
++++ services/lnd.py	2025-05-12 15:01:00.000000000 +0000
+@@ -1,6 +1,10 @@
+ import os
+ import requests
++import base64
++import json
++
++from requests.exceptions import RequestException
+ 
+ LND_REST_URL = os.getenv("LND_REST_URL", "https://127.0.0.1:8080")
+ LND_TLS_CERT = os.getenv("LND_TLS_CERT", "./lnd-data/tls.cert")
+ LND_MACAROON_PATH = os.getenv("LND_MACAROON_PATH", "./lnd-data/data/chain/bitcoin/regtest/admin.macaroon")

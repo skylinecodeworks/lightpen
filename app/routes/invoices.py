@@ -5,15 +5,16 @@ from sqlalchemy.orm import Session
 from app.schemas import InvoiceCreate, InvoiceResponse
 from app.models import Invoice, Receipt
 from app.core.auth import get_current_tenant
-from app.services.lnd import check_payment
 from app.core.pdf_generator import generate_pdf
 from app.core.db import get_db
+from app.services.lnd_grpc import LndGrpcClient
 
 # Configuramos logging
 t_logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 router = APIRouter()
+lnd = LndGrpcClient()
 
 @router.post("/", response_model=InvoiceResponse, tags=["Invoices"])
 def create_invoice(
@@ -66,8 +67,8 @@ def create_invoice(
             receipt_url=pdf_url
         )
 
-    # 2) Verificamos en LND que el pago esté confirmado
-    if not check_payment(payload.payment_hash):
+    # 2) Verificamos en LND que el pago esté confirmado usando gRPC
+    if not lnd.check_payment(payload.payment_hash):
         t_logger.warning(f"Pago no confirmado para hash {payload.payment_hash}")
         raise HTTPException(status_code=400, detail="Pago no confirmado")
 

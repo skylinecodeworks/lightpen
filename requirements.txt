@@ -12,3 +12,4 @@ Jinja2
 requests
 pydantic
 alembic
+lndgrpc

@@ -64,6 +64,8 @@ services:
   lnd2:
     image: lightninglabs/lnd:v0.18.5-beta
     container_name: lnd2
+    environment:
+      - GRPC_SERVER=localhost:10010
     command: >
       lnd
       --noseedbackup

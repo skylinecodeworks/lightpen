@@ -1,0 +1,38 @@
+import os
+import requests
+
+
+def check_payment(payment_hash: str) -> bool:
+    """Consulta real al nodo LND vía REST si el pago está completado."""
+    host, tls_cert, headers = get_lnd_rest_config()
+    # LND REST endpoint para listar pagos
+    url = f'https://{host}/v1/payments?include_incomplete=false'
+    try:
+        resp = requests.get(url, headers=headers, verify=tls_cert)
+        resp.raise_for_status()
+        payments = resp.json().get('payments', [])
+        for p in payments:
+            if p.get('payment_hash') == payment_hash and p.get('status') == 'SUCCEEDED':
+                return True
+    except requests.RequestException as e:
+        # Loggear error para diagnóstico
+        print(f"[LND-REST] Error al consultar pago: {e}")
+    return False
+
+
+
+
+
+def get_lnd_rest_config():
+    host = os.getenv("LND_REST_HOST")
+    tls_cert = os.getenv("LND_TLS_CERT_PATH")
+    macaroon_path = os.getenv("LND_MACAROON_PATH")
+
+    # Leer y codificar macaroon
+    with open(macaroon_path, 'rb') as f:
+        macaroon = f.read().hex()
+    headers = {
+        'Grpc-Metadata-macaroon': macaroon
+    }
+    return host, tls_cert, headers
+
